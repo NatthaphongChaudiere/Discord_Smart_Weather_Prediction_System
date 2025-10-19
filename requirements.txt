@@ -1,0 +1,6 @@
+Flask
+pandas
+requests
+python-dotenv
+openpyxl
+discord-webhook
