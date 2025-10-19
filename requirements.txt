@@ -4,3 +4,4 @@ requests
 python-dotenv
 openpyxl
 discord-webhook
+google-genai

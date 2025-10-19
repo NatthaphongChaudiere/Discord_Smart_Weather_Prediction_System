@@ -2,14 +2,19 @@ from flask import Flask, jsonify, request
 import pandas as pd
 import random
 import pickle
-from datetime import datetime
+import os
+import json
 from dotenv import load_dotenv
+from google import genai
+
+load_dotenv()
 
 model = pickle.load(open("weather_prediction_model.pkl", "rb"))
 le_wind = pickle.load(open("le_wind.pkl", "rb"))
 le_condition = pickle.load(open("le_condition.pkl", "rb"))
 
-load_dotenv()
+GEMINI_APIKEY = os.getenv("GEMINI_APIKEY")
+client = genai.Client(api_key=GEMINI_APIKEY)
 
 app = Flask(__name__)
 
@@ -52,7 +57,21 @@ def predict():
         prediction = model.predict(sample)[0]
         condition = le_condition.inverse_transform([prediction])[0]
 
-        return jsonify({'predicted_condition': condition})
+        prompt = f'''
+
+            Gemini, so your duty is to give detail short feedback (advice, cautious, suggestion, activity or etc.) on what to do when the weather is like
+            the json string format I'm provide below 
+            (Only answer with letter like a people giving advice, u don't need to put **Suggestion** or any sign at the front):
+
+        '''
+
+        # Ai-Suggestion
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents= f"{prompt}\n{json.dumps(data)}\nThe weather is predict to be: {condition}"
+        )
+
+        return jsonify({'predicted_condition': condition, 'ai_suggestion': response.text})
 
     except Exception as e:
         return jsonify({'error': str(e)}), 400

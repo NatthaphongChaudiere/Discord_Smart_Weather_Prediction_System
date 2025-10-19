@@ -27,8 +27,9 @@ def send_weather_alert():
             print("Error from FlaskAPI:", response.text)
             return
         
-        result = response.json()
+        result= response.json()
         condition = result.get("predicted_condition", "Unknown")
+        ai_suggestion = result.get("ai_suggestion", "Unknown")
 
         image_url = condition_images.get(condition, "https://cdn-icons-png.flaticon.com/512/414/414825.png")
 
@@ -49,7 +50,9 @@ def send_weather_alert():
         f"☀️ Daytime: {'Yes' if data['is_day'] else 'No'}",
         f"🔆 UV Index: {data['uv']}"
     ])
-    embed.add_embed_field(name="📋 Input Data", value=details, inline=True)
+    embed.add_embed_field(name="📋 Simulated Data Retreive from IoT", value=details, inline=True)
+
+    embed.add_embed_field(name="💡 AI Suggestion", value=ai_suggestion, inline=False)
 
     embed.set_thumbnail(url=image_url)
 
@@ -63,4 +66,4 @@ def send_weather_alert():
 
 while True:
     send_weather_alert()
-    time.sleep(10)
+    time.sleep(30)
